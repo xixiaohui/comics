@@ -5,6 +5,14 @@ import { z } from "zod";
 
 import { hunyuan_ai } from "@/lib/hunyuan_db"; 
 
+
+// ⭐ 统一 CORS headers
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 // ===== 初始化 Genkit =====
 const ai = genkit({
   plugins: [],
@@ -58,6 +66,16 @@ ${query}
   }
 );
 
+
+
+// ✅ 处理预检请求（关键！）
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders,
+  });
+}
+
 // ===== API（Next.js）=====
 export async function POST(req: NextRequest) {
   try {
@@ -65,21 +83,42 @@ export async function POST(req: NextRequest) {
     const { query } = body;
 
     if (!query) {
-      return NextResponse.json(
-        { error: "query 不能为空" },
-        { status: 400 }
+      return new NextResponse(
+        JSON.stringify({ error: 'query 不能为空' }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
       );
     }
 
     const result = await analyzeFlow({ query });
 
-    return NextResponse.json({ result });
+    return new NextResponse(
+      JSON.stringify({ result }),
+      {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
   } catch (e: any) {
-    console.error("❌ AI error:", e);
+    console.error('❌ AI error:', e);
 
-    return NextResponse.json(
-      { error: "AI调用失败" },
-      { status: 500 }
+    return new NextResponse(
+      JSON.stringify({ error: 'AI调用失败' }),
+      {
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      }
     );
   }
 }
