@@ -1,26 +1,43 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
+import axios from "axios";
 import { genkit } from "genkit";
 import { z } from "zod";
 
-import { hunyuan_ai } from "@/lib/hunyuan_db"; 
+// ===== 初始化 =====
+const API_KEY = process.env.DEEPSEEK_API_KEY;
+
+if (!API_KEY) {
+  throw new Error("❌ DEEPSEEK_API_KEY 未设置");
+}
+
+// ===== DeepSeek 调用 =====
+async function callDeepSeek(messages: any[]) {
+  const res = await axios.post(
+    "https://api.deepseek.com/v1/chat/completions",
+    {
+      model: "deepseek-chat",
+      messages,
+      temperature: 0.7,
+      max_tokens: 1000,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      timeout: 30000,
+    },
+  );
+
+  return res.data.choices[0].message.content;
+}
 
 // ===== 初始化 Genkit =====
 const ai = genkit({
   plugins: [],
+  model: "deepseek-chat", // 可选
 });
-
-const model = hunyuan_ai.createModel("hunyuan-exp");
-
-// ===== 封装混元调用 =====
-async function callHunyuan(messages: any[]) {
-  const res = await model.generateText({
-    model: "hunyuan-2.0-instruct-20251111",
-    messages,
-  });
-
-  return res.text;
-}
 
 // ===== Flow =====
 const analyzeFlow = ai.defineFlow(
@@ -44,7 +61,7 @@ const analyzeFlow = ai.defineFlow(
 
 ${query}
 
-请按结构输出：
+请按格式输出：
 【结论】
 【原因】
 【建议】
@@ -52,34 +69,28 @@ ${query}
       },
     ];
 
-    const result = await callHunyuan(messages);
+    const result = await callDeepSeek(messages);
 
     return result;
-  }
+  },
 );
 
-// ===== API（Next.js）=====
+// ===== API（Next.js Route Handler）=====
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { query } = body;
 
     if (!query) {
-      return NextResponse.json(
-        { error: "query 不能为空" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "query 不能为空" }, { status: 400 });
     }
 
     const result = await analyzeFlow({ query });
 
     return NextResponse.json({ result });
   } catch (e: any) {
-    console.error("❌ AI error:", e);
+    console.error("❌ AI error:", e.response?.data || e.message);
 
-    return NextResponse.json(
-      { error: "AI调用失败" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "AI调用失败" }, { status: 500 });
   }
 }
