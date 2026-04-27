@@ -87,7 +87,7 @@ export default function HomePage() {
       <div className="text-center py-12 mb-10">
         <div className="text-6xl mb-4">🐾</div>
         <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-orange-400 to-pink-500 bg-clip-text text-transparent">
-          OpenClaw Comics
+          XClaw Comics
         </h1>
         <p className="text-xl text-gray-400 max-w-2xl mx-auto">
           AI-generated comics — fresh stories delivered automatically. Read the latest chapters now.

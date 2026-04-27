@@ -13,23 +13,27 @@
     "@types/multer": "^2.1.0",
     "@types/pg": "^8.18.0",
     "@types/uuid": "^10.0.0",
+    "axios": "^1.15.2",
     "dotenv": "^17.3.1",
+    "genkit": "^1.33.0",
     "multer": "^2.1.1",
     "next": "16.1.6",
     "pg": "^8.20.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "sharp": "^0.34.5",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^20.19.39",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   }
+
 }

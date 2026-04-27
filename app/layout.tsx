@@ -34,7 +34,7 @@ export default function RootLayout({
             <Link href="/" className="flex items-center gap-2 group">
               <span className="text-2xl">🐾</span>
               <span className="font-bold text-xl text-white group-hover:text-orange-400 transition-colors">
-                OpenClaw Comics
+                XClaw Comics
               </span>
             </Link>
             <div className="flex items-center gap-6 text-sm text-gray-400">
@@ -50,7 +50,7 @@ export default function RootLayout({
         {/* Footer */}
         <footer className="border-t border-gray-800 bg-gray-950 mt-16 py-8">
           <div className="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500">
-            <p>© 2026 OpenClaw Comics · AI-Generated Content Platform</p>
+            <p>© 2026 XClaw Living · AI-Generated Content Platform</p>
           </div>
         </footer>
       </body>
