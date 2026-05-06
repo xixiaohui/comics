@@ -24,6 +24,14 @@ export async function POST(req: NextRequest) {
 
     const { collection, ...fields } = body; // ⭐ 关键改动
 
+
+    // ⭐ 核心：自动拆 data
+    let cleanFields = fields;
+
+    if ("data" in fields && typeof fields.data === "object") {
+      cleanFields = fields.data;
+    }
+
     // ⭐ 参数校验
     if (!collection || typeof collection !== "string") {
       return NextResponse.json(
@@ -51,7 +59,7 @@ export async function POST(req: NextRequest) {
     // ⭐ 自动字段
     const now = Date.now();
     const newData = {
-      ...fields,
+      ...cleanFields,
       created_at: now,
       updated_at: now,
     };
