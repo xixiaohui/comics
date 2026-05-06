@@ -64,10 +64,10 @@ export async function POST(req: NextRequest) {
       updated_at: now,
     };
 
+    console.log("新增数据：", newData);
+
     // ✅ 写入数据库
-    const res = await db.collection(collection).add({
-      data: newData,
-    });
+    const res = await db.collection(collection).add(newData);
 
     return NextResponse.json(
       {
