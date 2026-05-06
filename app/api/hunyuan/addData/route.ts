@@ -22,54 +22,36 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    const { collection, data } = body;
+    const { collection, ...fields } = body; // ⭐ 关键改动
 
     // ⭐ 参数校验
     if (!collection || typeof collection !== "string") {
-      return new NextResponse(
-        JSON.stringify({
-          success: false,
-          error: "collection 不能为空",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+      return NextResponse.json(
+        { success: false, error: "collection 不能为空" },
+        { status: 400, headers: corsHeaders },
       );
     }
 
-    if (!data || typeof data !== "object") {
-      return new NextResponse(
-        JSON.stringify({
-          success: false,
-          error: "data 必须是对象",
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+    if (!fields || Object.keys(fields).length === 0) {
+      return NextResponse.json(
+        { success: false, error: "数据不能为空" },
+        { status: 400, headers: corsHeaders },
       );
     }
 
-    // ⭐ 数据大小限制（防止滥用）
+    // ⭐ 数据大小限制
     const MAX_SIZE = 16 * 1024;
-    if (JSON.stringify(data).length > MAX_SIZE) {
-      return new NextResponse(
-        JSON.stringify({
-          success: false,
-          error: "数据过大",
-        }),
-        {
-          status: 413,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+    if (JSON.stringify(fields).length > MAX_SIZE) {
+      return NextResponse.json(
+        { success: false, error: "数据过大" },
+        { status: 413, headers: corsHeaders },
       );
     }
 
     // ⭐ 自动字段
     const now = Date.now();
     const newData = {
-      ...data,
+      ...fields,
       created_at: now,
       updated_at: now,
     };
@@ -79,28 +61,22 @@ export async function POST(req: NextRequest) {
       data: newData,
     });
 
-    return new NextResponse(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         success: true,
         data: {
           id: res.id,
         },
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
+      { headers: corsHeaders },
     );
   } catch (err: any) {
-    return new NextResponse(
-      JSON.stringify({
+    return NextResponse.json(
+      {
         success: false,
         error: err.message || "服务器错误",
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
+      { status: 500, headers: corsHeaders },
     );
   }
 }
