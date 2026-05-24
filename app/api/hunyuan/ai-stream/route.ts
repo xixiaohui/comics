@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
       async start(controller) {
         try {
           const res = await model.streamText({
-            model: "hunyuan-turbos-latest", // ✅ 先用这个
+            model: "hy3-preview", // ✅ 先用这个
             messages: messages as any, // ✅ 关键,
           });
 
