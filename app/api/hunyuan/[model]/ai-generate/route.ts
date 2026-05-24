@@ -42,7 +42,7 @@ export async function POST(
     // ── 非流式 ──
     if (!doStream) {
       const res = await aiModel.generateText({
-        model: subModel ?? "hunyuan-turbos-latest",
+        model: subModel ?? "hy3-preview",
         messages: cleaned,
       });
 
@@ -63,7 +63,7 @@ export async function POST(
 
         try {
           const res = await aiModel.streamText({
-            model: subModel ?? "hunyuan-turbos-latest",
+            model: subModel ?? "hy3-preview",
             messages: cleaned,
           });
 
