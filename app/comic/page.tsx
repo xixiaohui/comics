@@ -15,7 +15,54 @@ export default function ComicPage() {
   const [error, setError] = useState("");
   const abortRef = useRef<AbortController | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  // addData state
+  const [collection, setCollection] = useState("dailyApples");
+  const [jsonData, setJsonData] = useState(
+    '{\n  "title": "Test Comic",\n  "content": "Test Author"\n}'
+  );
+  const [addDataResult, setAddDataResult] = useState("");
+  const [addDataLoading, setAddDataLoading] = useState(false);
+  const [addDataError, setAddDataError] = useState("");
+
+  async function handleAddData(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!jsonData.trim()) return;
+
+    setAddDataResult("");
+    setAddDataError("");
+    setAddDataLoading(true);
+
+    try {
+      let parsed: Record<string, unknown>;
+      try {
+        parsed = JSON.parse(jsonData);
+      } catch {
+        setAddDataError("Invalid JSON format");
+        setAddDataLoading(false);
+        return;
+      }
+
+      const res = await fetch("/api/hunyuan/addData", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ collection, ...parsed }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setAddDataResult(JSON.stringify({ id: data.data.id }, null, 2));
+      } else {
+        setAddDataError(data.error || "Unknown error");
+      }
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setAddDataError(error.message);
+    } finally {
+      setAddDataLoading(false);
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!userMessage.trim()) return;
 
@@ -209,6 +256,57 @@ export default function ComicPage() {
           </pre>
         </div>
       )}
+
+      <hr className="border-gray-700" />
+
+      <section className="space-y-6">
+        <h2 className="text-2xl font-bold text-orange-500">Add Data Test</h2>
+
+        <form onSubmit={handleAddData} className="space-y-4">
+          <label className="block space-y-1.5">
+            <span className="text-sm text-gray-400">Collection</span>
+            <input
+              type="text"
+              value={collection}
+              onChange={(e) => setCollection(e.target.value)}
+              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="comics"
+            />
+          </label>
+
+          <label className="block space-y-1.5">
+            <span className="text-sm text-gray-400">JSON Data</span>
+            <textarea
+              value={jsonData}
+              onChange={(e) => setJsonData(e.target.value)}
+              rows={6}
+              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 resize-y"
+            />
+          </label>
+
+          <button
+            type="submit"
+            disabled={addDataLoading || !jsonData.trim()}
+            className="px-6 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium transition-colors"
+          >
+            {addDataLoading ? "Sending..." : "Add Data"}
+          </button>
+        </form>
+
+        {addDataError && (
+          <div className="rounded-lg border border-red-700 bg-red-900/30 p-4">
+            <p className="text-red-400 text-sm font-medium mb-1">Error</p>
+            <pre className="text-red-300 text-sm whitespace-pre-wrap">{addDataError}</pre>
+          </div>
+        )}
+
+        {addDataResult && (
+          <div className="rounded-lg border border-green-700 bg-green-900/30 p-4">
+            <p className="text-green-400 text-sm font-medium mb-1">Success</p>
+            <pre className="text-green-300 text-sm whitespace-pre-wrap">{addDataResult}</pre>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
